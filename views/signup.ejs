@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Signup</title>
+	<link rel="stylesheet" href="/public/css/main.min.css">
+	<link rel="stylesheet" href="/public/css/style.css">
+	<link rel="stylesheet" href="/public/css/color.css">
+</head>
+
+<body>
+    <div class="theme-layout">
+		<div class="container-fluid pdng0">
+			<div class="row merged">
+				<div class="offset-md-3 col-md-6">
+					<div class="login-reg-bg">
+						<div class="log-reg-area sign">
+							<h2 class="log-title">Signup</h2>
+
+							<form onsubmit="return doRegister(this);">
+								<div class="form-group">
+									<input type="text" required name="name" id="fn" onclick="allLetter(name)"/>
+									<label class="control-label">Full Name</label>
+									<i class="mtrl-select"></i>
+								</div>
+
+								<div class="form-group">
+									<input type="text" required name="username" id="un" onclick="allLetter(username)"/>
+									<label class="control-label">User Name</label>
+									<i class="mtrl-select"></i>
+								</div>
+
+								<div class="form-group">
+									<input type="email" required name="email" />
+									<label class="control-label">Email</label>
+									<i class="mtrl-select"></i>
+								</div>
+
+								<div class="form-group">
+									<input type="password" required name="password" id="pass"/>
+									<label class="control-label">Password</label>
+									<i class="mtrl-select"></i>
+								</div>
+
+								<div class="form-group">
+									<input type="password" required name="confirmpassword" id="confpass"/>
+									<label class="control-label">Confirm Password</label>
+									<i class="mtrl-select"></i>
+								</div>
+								<div>
+									<ul>
+										<li>Password needs capital Letter</li>
+										<li>Password needs number</li>
+										<li>Password needs a special character</li>
+										<li>Password Length must be atleast 6</li>
+									</ul>
+								</div>
+								<div class="form-radio">
+									<div class="radio">
+										<label>
+											<input type="radio" name="gender" value="Male" checked />
+											<i class="check-box"></i> Male
+										</label>
+									</div>
+
+									<div class="radio">
+										<label>
+											<input type="radio" name="gender" value="Female" />
+											<i class="check-box"></i> Female
+										</label>
+									</div>
+								</div>
+
+								Already have an account? <a href="/login"><span style="color: blue;">Login here</span></a>
+								<div class="submit-btns">
+									<button class="mtr-btn signup" name="submit" type="submit" id="register">
+										<span>Register</span>
+									</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+    <script>
+        function doRegister(form) {
+			const passPattern = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,}$/
+			const pass = document.getElementById("pass").value
+			
+			if(!passPattern.test(pass)){
+				alert('Enter password as per requirements')
+				return
+			}
+			
+			const confirmPassword = document.getElementById("confpass").value;
+			if (pass != confirmPassword) {
+				alert("Passwords do not match.");
+				return;
+			}
+            form.submit.setAttribute("disabled", "disabled");
+            form.submit.innerHTML = "<span>loading...</span>";
+
+            var ajax = new XMLHttpRequest();
+            ajax.open("POST", "/signup", true);
+
+            ajax.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    form.submit.removeAttribute("disabled");
+                    form.submit.innerHTML = "<span>Register</span>";
+
+                    var response = JSON.parse(this.responseText);
+                    alert(response.message);
+
+                    if (response.status == "success") {
+                        window.location.href = "/login";
+                    }
+                }
+            };
+            ajax.send(new FormData(form));
+            return false;
+        }
+    </script>
+</body>
+
+</html>

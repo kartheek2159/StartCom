@@ -1,0 +1,28 @@
+<%- include ("includes/header") %>
+ <section>
+     <div class="feature-photo">
+         <figure>
+             <img id="page-cover-photo">
+         </figure>
+         <div class="add-btn">
+             <span id="page-likes"></span>
+             <a href="javascript:void(0);" onclick="toggleLikePage();" id="btn-toggle-like"></a>
+         </div>
+         <div class="container-fluid">
+             <div class="row merged">
+                 <div class="col-lg-10 col-sm-9">
+                     <div class="timeline-info">
+                         <ul>
+                             <li class="admin-name">
+                                 <h5 style="padding:25px;" id="page-name"></h5>
+                             </li>
+
+                         </ul>
+                     </div>
+                 </div>
+             </div>
+         </div>
+     </div>
+ </section>
+ <input type="hidden"  id="_id" value="<%= _id %>"><!-- id recieving from url -->
+ <%- include ("includes/footer") %>
