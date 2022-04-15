@@ -705,6 +705,7 @@ http.listen(3000, function () {
       });
     });
   });
+
   app.post("/sendFriendRequest",function(request,result){
     var accessToken=request.fields.accessToken;
     var _id=request.fields._id;
@@ -716,10 +717,9 @@ http.listen(3000, function () {
           "status":"error",
           "message":"User has been logged out.Please login again"
         });
-      }
-      else
+      }else
       {
-        var me=user;//saving user object in other variable and checking other account existence
+        var me=user;
         database.collection("users").findOne({
           "_id":ObjectId(_id)
         },function(error,user){
@@ -732,120 +732,181 @@ http.listen(3000, function () {
           else
           {
             database.collection("users").updateOne({
-              "_id":ObjectId(_id)
-            },{
-              $push:{
-                "friends":{
-                  "_id":me._id,
-                  "name":me.name,
-                  "profileImage":me.profileImage,
-                  "status":"Pending",
-                  "sentByMe":false,
-                  "inbox":[]
-
-                }
-              }
-            },function(error,data){
-                database.collection("users").updateOne({
-                  "_id":me._id
-                },{
-                  $push:{"friends":{
-                    "_id":user._id,
-                    "name":user.name,
-                    "profileImage":user.profileImage,
-                    "status":"Pending",
-                    "sentByMe":true,
-                    "inbox":[]
+                          "_id":ObjectId(_id)
+                        },{
+                          $push:{
+                            "friends":{
+                              "_id":me._id,
+                              "name":me.name,
+                              "profileImage":me.profileImage,
+                              "status":"Pending",
+                              "sentByMe":false,
+                              "inbox":[]
+            
+                            }
+                          }
+                        },function(error,data){
+                            database.collection("users").updateOne({
+                              "_id":me._id
+                            },{
+                              $push:{"friends":{
+                                "_id":user._id,
+                                "name":user.name,
+                                "profileImage":user.profileImage,
+                                "status":"Pending",
+                                "sentByMe":true,
+                                "inbox":[]
+                              }
+                            }
+                            },function(error,data){
+                              result.json({
+                                "status":"success",
+                                "message":"Friend Request has been sent"
+                             });
+                            });
+                        });
+                      }
+                    });
                   }
-                }
-                },function(error,data){
-                  result.json({
-                    "status":"success",
-                    "message":"Friend Request has been sent"
-                 })
-                })
-            })
-          }
-        })
-      }
-    })
-  })
+                });
+              });
+            
+              
+
   app.get("/friends",function(request,result){
     result.render("friends");
   });
-  app.post("/acceptFriendRequest",function(request,result){
-    var accessToken=request.fields.accessToken;
-    var _id=request.fields._id;
-    database.collection("users").findOne({
-      "accessToken":accessToken,
-      function(error,user){
-        if(user==null){
-          result.json({
-            "status":"error",
-            "message":"User has been logged out.Please Login again."
-          });
-        }
-        else
-        {
-          var me=user; //saving user object in other variable and checking other account existence
-          database.collection("users").findOne({
-            "_id":ObjectId(_id)
-          },function(error,user){
-            if(user==null){
-              result.json({
-                "status":"error",
-                "message":"user doesnot exist"
-              });
-            }
-            else{
-              database.collection("users").updateOne({
-                "_id":ObjectId(_id)
-              },{
-                $push:{
-                  "notifications":{
-                    "_id":ObjectId(),
-                    "type":"friend_request_accepted",
-                    "content":me.name+"accepted your friend request.",
-                    "profileImage":me.profileImage,
-                    "createdAt":new Date().getTime()
-                  }
-                }
-              });
-              database.collection("users").updateOne({
-                $and:[{
-                  "_id":ObjectId(_id)
-                },{
-                  "friends._id":me._id
-                }]
-              },{
-                $set:{
-                  "friends.$.status":"Accepted"
-                }
-              },function(error,data){
-                database.collection("users").updateOne({
-                  $and:[{
-                    "_id":me._id
-                  },{
-                    "friends._id":user._id
-                  }]
-                },{
-                  $set:{
-                    "friends.$.status":"Accepted"
-                  }
-                },function(error,data){
-                  result.json({
-                    "status":"success",
-                    "message":"Friend Request has been accepted"
-                  })
-                })
-              })
-            }
-          }
-          )
-        }
-      }
-    })
-  })
+
+  // app.post("/acceptFriendRequest",function(request,result){
+  //   var accessToken=request.fields.accessToken;
+  //   var _id=request.fields._id;
+  //   database.collection("users").findOne({
+  //     "accessToken":accessToken},
+  //     function(error,user){
+  //       if(user==null){
+  //         result.json({
+  //           "status":"error",
+  //           "message":"User has been logged out.Please Login again."
+  //         });
+  //       }
+  //       else
+  //       {
+  //         var me=user; //saving user object in other variable and checking other account existence
+  //         database.collection("users").findOne({
+  //           "_id":ObjectId(_id)
+  //         },function(error,user){
+  //           if(user==null){
+  //             result.json({
+  //               "status":"error",
+  //               "message":"user doesnot exist"
+  //             });
+  //           }
+  //           else{
+  //             database.collection("users").updateOne({
+  //               "_id":ObjectId(_id)
+  //             },{
+  //               $push:{
+  //                 "notifications":{
+  //                   "_id":ObjectId(),
+  //                   "type":"friend_request_accepted",
+  //                   "content":me.name+"accepted your friend request.",
+  //                   "profileImage":me.profileImage,
+  //                   "createdAt":new Date().getTime()
+  //                 }
+  //               }
+  //             });
+  //             database.collection("users").updateOne({
+  //               $and:[{
+  //                 "_id":ObjectId(_id)
+  //               },{
+  //                 "friends._id":me._id
+  //               }]
+  //             },{
+  //               $set:{
+  //                 "friends.$.status":"Accepted"
+  //               }
+  //             },function(error,data){
+  //               database.collection("users").updateOne({
+  //                 $and:[{
+  //                   "_id":me._id
+  //                 },{
+  //                   "friends._id":user._id
+  //                 }]
+  //               },{
+  //                 $set:{
+  //                   "friends.$.status":"Accepted"
+  //                 }
+  //               },function(error,data){
+  //                 result.json({
+  //                   "status":"success",
+  //                   "message":"Friend Request has been accepted"
+  //                 })
+  //               })
+  //             })
+  //           }
+  //         }
+  //         )
+  //       }
+  //     })
+  //   })
+
+  // app.post("/unfriend",function(request,result){
+  //   var accessToken=request.fields.accessToken;
+  //   var _id=request.fields._id;
+  //   database.collection("users").findOne({
+  //     "accessToken":accessToken
+  //   },function(error,user){
+  //     if(user==null){
+  //       result.json({
+  //         "status":"error",
+  //         "message":"user has been logged out."
+  //       });
+  //     }
+  //     else
+  //     {
+  //       var me=user;
+  //       database.collection("users").findOne({
+  //         "_id":ObjectId(_id)
+  //       },function(error,user){
+  //         if(user==null){
+  //           result.json({
+  //             "status":"error",
+  //             "message":"user doesnot exist."
+  //           });
+  //         }
+  //         else{
+  //           database.collection("users").updateOne({
+  //             "_id":ObjectId(_id)
+  //           },{
+  //             $pull:{
+  //               "friends":{
+  //                 "_id":me._id
+  //               }
+  //             }
+  //           },function(error,data){
+  //             database.collection("users").updateOne({
+  //               "_id":me._id
+  //             },{
+  //               $pull:{
+  //                 "friends":{
+  //                   "_id":user._id
+  //                 }
+  //               }
+  //             },function(error,data){
+  //               result.json({
+  //                 "status":"error",
+  //                 "message":"Friend has been removed."
+  //               });
+
+  //             })
+  //           })
+  //         }
+  //       })
+  //     }
+  //   })
+  // })
+
+
   app.get("/inbox",function(request,result){
     result.render("inbox");
   });
@@ -860,10 +921,12 @@ http.listen(3000, function () {
   });
   app.get("/groups",function(request,result){
     result.render("groups");
-  })
+  });
   app.get("/notifications",function(request,result){
     result.render("notifications");
-  })
+  });
+
+
 });
 });
 

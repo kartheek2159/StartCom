@@ -47,9 +47,9 @@
                             html+='<a href="/">'+data.name+'</a>';
                         html+='</h4>';
                     if(!data.sentByMe&&data.status=="Pending"){
-                        html+='<a href="javascript:void(0);" data-id="'+data._id+'" onclick=doAccept(this);" class="add-butn more-action">Accept</a>';
+                        html+='<a href="javascript:void(0);" data-id="'+ data._id + '" onclick="doAccept(this);" class="add-butn more-action">Accept</a>';
                     }
-                    html+='<a href="javascript:void(0);" data-id="'+data._id+'" onclick=doUnfriend(this);" class="add-butn btn-unfriend">Unfriend</a>';
+                    html+='<a href="javascript:void(0);" data-id="'+ data._id + '" onclick="doUnfriend(this);" class="add-butn btn-unfriend">Unfriend</a>';
                     html+='</div>';
                 html+='</div>';
             html+='</li>';
