@@ -23,4 +23,22 @@
         </div>
     </div>
 </section>
+<script>
+    var isPages=true;
+    function getPages(){
+        var ajax=new XMLHttpRequest();
+        ajax.open("POST","/getPages",true);
+        ajax.onreadystatechange=function(){
+            if(this.readyState==4&&this.status==200){
+                var response=JSON.parse(this.responseText);
+                if(response.status=="error"){
+                    alert(response.message);
+                    return;
+                }
+                var html="";
+                
+            }
+        }
+    }
+</script>
 <%- include("includes/footer") %>
