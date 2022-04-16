@@ -122,8 +122,7 @@
 		ajax.onreadystatechange==function(){
 			if(this.readyState==4&&this.status==200){
 				var response=JSON.parse(this.responseText);
-				alert("friend request sent");
-				// alert(response.message);
+				alert(response.message);
 				self.remove();//remove friend req button
 
 			}
@@ -134,6 +133,23 @@
 		ajax.send(formData);
 		
 	}
+	function doUnfriend(self){
+        var _id=self.getAttribute("data-id");
+        var ajax=new XMLHttpRequest();
+        ajax.open("POST","/unfriend",true);
+        ajax.onreadystatechange=function(){
+            if(this.readyState==4&&this.status==200){
+                var response=JSON.parse(this.responseText);
+                alert(response.message);
+                self.remove();
+            }
+        };
+        var formData=new FormData();
+        formData.append("accessToken",localStorage.getItem("accessToken"));
+        formData.append("_id",_id);
+        ajax.send(formData);
+
+    }
 </script>
 
 <%- include ("includes/footer") %>
