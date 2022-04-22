@@ -402,44 +402,87 @@ http.listen(3000, function () {
 
                });
              }
-            database.collection("posts").insertOne({
-              "caption":caption,
-              "image":image,
-              "video":video,
-              "type":type,
-              "createdAt":createdAt,
-              "likers":[],
-              "shares":[],
-              "user":{
-                "_id":user._id,
-                "name":user.name,
-                "profileImage":user.profileImage
-              }
-            },function(error,data){
-              database.collection("users").updateOne({
-                "accessToken":accessToken
-              },{
-                $push:{
-                  "posts":{
-                    "_id":data.insertedId,
-                    "caption":caption,
-                    "image":image,
-                    "video":video,
-                    "type":type,
-                    "createdAt":createdAt,
-                    "likers":[],
-                    "shares":[],
-
-                  }
+             if(type=="page_post"){
+               database.collection("pages").findOne({
+                 "_id":ObjectId(_id)
+               },function(error,page){
+                 if(page==null){
+                   result.json({
+                     "status":"error",
+                     "message":"Page doesnot exist"
+                   });
+                   return;
+                 }else
+                 {
+                   if(page.user._id.toString()!=user._id.toString()){
+                     result.json({
+                       "status":"error",
+                       "message":"Sorry,you do not own this page"
+                     });
+                     return;
+                   }
+                   database.collection("posts").insertOne({
+                     "caption":caption,
+                     "image":image,
+                     "video":video,
+                     "type":type,
+                     "createdAt":createdAt,
+                     "likers":[],
+                     "shares":[],
+                     "user":{
+                       "_id":page._id,
+                       "name":page.name,
+                       "profileImage":page.coverPhoto
+                     }
+                   },function(error,data){
+                     result.json({
+                       "status":"success",
+                       "message":"Post has been uploaded"
+                     })
+                   })
+                 }
+               })
+             }else{
+              database.collection("posts").insertOne({
+                "caption":caption,
+                "image":image,
+                "video":video,
+                "type":type,
+                "createdAt":createdAt,
+                "likers":[],
+                "shares":[],
+                "user":{
+                  "_id":user._id,
+                  "name":user.name,
+                  "profileImage":user.profileImage
                 }
               },function(error,data){
-                result.json({
-                  "status":"success",
-                  "message":"Post has been uploaded"
+                database.collection("users").updateOne({
+                  "accessToken":accessToken
+                },{
+                  $push:{
+                    "posts":{
+                      "_id":data.insertedId,
+                      "caption":caption,
+                      "image":image,
+                      "video":video,
+                      "type":type,
+                      "createdAt":createdAt,
+                      "likers":[],
+                      "shares":[],
+  
+                    }
+                  }
+                },function(error,data){
+                  result.json({
+                    "status":"success",
+                    "message":"Post has been uploaded"
+                  });
                 });
               });
-            });
+             }
           };
+        });
       });
       app.post("/getNewsfeed", function (request, result) {
         var accessToken = request.fields.accessToken;
@@ -682,7 +725,6 @@ http.listen(3000, function () {
           }
         });
       });
-  });
   app.get("/search/:query", function (request, result) {
     var query = request.params.query;
     result.render("search", {
@@ -1088,6 +1130,52 @@ http.listen(3000, function () {
   app.get("/pages",function(request,result){
     result.render("pages");
   });
+  app.post("/getPages",function(request,result){
+    var accessToken=request.fields.accessToken;
+    database.collection("users").findOne({
+      "accessToken":accessToken
+    },function(error,user){
+      if(user==null){
+        result.json({
+          "status":"error",
+          "message":"User has been logged out"
+        });
+      }else
+      {
+        database.collection("pages").find({
+          $or:[{
+            "user._id":user._id
+          },{
+            "likers._id":user._id
+          }]
+        }).toArray(function(error,data){
+          result.json({
+            "status":"success",
+            "message":"Record has been fetched",
+            "data":data
+          });
+        });
+      }
+    });
+  });
+  app.get("/page/:_id",function(request,result){
+    var _id=request.params._id;
+    database.collection("pages").findOne({
+      "_id":ObjectId(_id)
+    },function(error,page){
+      if(page==null){
+        result.json({
+          "status":"error",
+          "message":"Page doesnot exist"
+        });
+      }else
+      {
+        result.render("singlePage",{
+          "_id":_id
+        })
+      }
+    })
+  })
   // app.get("/createGroup",function(request,result){
   //   result.render("createGroup");
   // });
@@ -1097,8 +1185,33 @@ http.listen(3000, function () {
   // app.get("/notifications",function(request,result){
   //   result.render("notifications");
   // });
-
-
-
+  app.post("/getPageDetail",function(request,result){
+    var _id=request.fields._id;
+    database.collection("pages").findOne({
+      "_id":ObjectId(_id)
+    },function(error,page){
+      if(page==null){
+        result.json({
+          "status":"error",
+          "message":"Page doesnot exist"
+        });
+      }else{
+        database.collection("posts").find({
+          $and:[{
+            "user._id":page._id
+          },{
+            "type":"page_post"
+          }]
+        }).toArray(function(error,posts){
+          result.json({
+            "status":"success",
+            "message":"Record has been fetched",
+            "data":page,
+            "posts":posts
+          })
+        })
+      }
+    })
+  })
 });
 });

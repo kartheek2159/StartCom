@@ -44,6 +44,12 @@
 						if(typeof isFriends!="undefined"&&isFriends){
 							showFriends();
 						}
+						if(typeof isPages!="undefined"&&isPages){
+							getPages();
+						}
+						if(typeof isPageDetail!="undefined"&&isPageDetail){
+							getPageDetail();
+						}
 
 					} else {
 						localStorage.removeItem("accessToken");
