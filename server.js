@@ -1187,12 +1187,6 @@ http.listen(3000, function () {
       }
     })
   })
-  // app.get("/createGroup",function(request,result){
-  //   result.render("createGroup");
-  // });
-  // app.get("/groups",function(request,result){
-  //   result.render("groups");
-  // });
   // app.get("/notifications",function(request,result){
   //   result.render("notifications");
   // });
@@ -1334,6 +1328,103 @@ http.listen(3000, function () {
           result.json({
             "status":"success",
             "message":"Record has been fetched",
+            "data":data
+          })
+        })
+      }
+    })
+  })
+    app.get("/createGroup",function(request,result){
+    result.render("createGroup");
+  });
+  app.post("/createGroup",function(request,result){
+    var accessToken=request.fields.accessToken;
+    var name=request.fields.name;
+    var additionalInfo=request.fields.additionalInfo;
+    var coverPhoto="";
+    database.collection("users").findOne({
+      "accessToken":accessToken
+    },function(error,user){
+      if(user==null){
+        result.json({
+          "status":"error",
+          "message":"User has been logged out"
+        });
+      }else{
+        if(request.files.coverPhoto.size>0&&request.files.coverPhoto.type.includes("image")){
+          coverPhoto="public/images/"+new Date().getTime()+"-"+request.files.coverPhoto.name;
+          fileSystem.rename(request.files.coverPhoto.path,coverPhoto,function(error){
+
+          })
+          database.collection("groups").insertOne({
+            "name":name,
+            "additionalInfo":additionalInfo,
+            "coverPhoto":coverPhoto,
+            "members":[{
+              "_id":user._id,
+              "name":user.name,
+              "profileImage":user.profileImage,
+              "status":"Accepted"
+            }],
+            "user":{
+              "_id":user._id,
+              "name":user.name,
+              "profileImage":user.profileImage
+            }
+          },function(error,data){
+            database.collection("users").updateOne({
+              "accessToken":accessToken
+            },{
+              $push:{
+                "groups":{
+                  "_id":data.insertedId,
+                  "name":name,
+                  "coverPhoto":coverPhoto,
+                  "status":"accepted"
+
+                }
+              }
+            },function(error,data){
+              result.json({
+                "status":"success",
+                "message":"Group has been created"
+              })
+            })
+          });
+        }else{
+          result.json({
+            "status":"error",
+            "message":"Please select a cover photo"
+          })
+        }
+      }
+    })
+  })
+   app.get("/groups",function(request,result){
+    result.render("groups");
+  });
+  app.post("/getGroups",function(request,result){
+    var accessToken=request.fields.accessToken;
+    database.collection("users").findOne({
+      "accessToken":accessToken
+    },function(error,user){
+      if(user==null){
+        result.json({
+          "status":"error",
+          "message":"user has been logged out"
+        })
+      }else
+      {
+        database.collection("groups").find({
+          $or:[{
+            "user._id":user._id
+          },{
+            "members._id":user._id
+          }]
+        }).toArray(function(error,data){
+          result.json({
+            "status":"success",
+            "message":"record has been fetched",
             "data":data
           })
         })
