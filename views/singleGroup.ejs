@@ -42,4 +42,36 @@
 </section>
 
 <input type="hidden" id="_id" value="<%= _id%>">
+<script>
+    var isGroupDetail=true;
+    function getGroupDetail(){
+        var ajax=new XMLHttpRequest();
+        ajax.open("POST","/getGroupDetail",true);
+        ajax.onreadystatechange=function(){
+            if(this.readyState==4&&this.status==200){
+                var response=JSON.parse(this.responseText);
+                document.getElementById("group-cover-photo").setAttribute("src",mainURL+"/"+response.data.coverPhoto);
+                document.getElementById("group-members").innerHTML=response.data.members.length+"members";
+                document.getElementById("group-name").innerHTML=response.data.name;
 
+                var isMember=false;
+                for (var a=0;a<response.data.members.length;a++){
+                    var member=response.data.members[a];
+                    if(member._id.toString()==user._id.toString()){
+                        isMember=true;
+                        break;
+                    }
+                }
+                if(isMember){
+                    showAddPost();
+                }
+            }
+        }
+        var formData=new FormData();
+        formData.append("accessToken",localStorage.getItem("accessToken"));
+        formData.append("_id",document.getElementById("_id").value);
+        ajax.send(formData);
+
+    }
+</script>
+<%- include ("includes/footer") %>

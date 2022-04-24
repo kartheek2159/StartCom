@@ -1045,10 +1045,6 @@ http.listen(3000, function () {
                    }
                  }
                },function(error,data){
-                //  socketIO.to(users[user._id]).emit("messageReceived",{
-                //    "message":message,
-                //    "from":me._id
-                //  })
                  result.json({
                    "status":"success",
                    "message":"message has been sent"
@@ -1061,29 +1057,6 @@ http.listen(3000, function () {
 
      });
    });
-
-  //  app.post("/connectSocket",function(request,result){
-  //   var accessToken=request.fields.accessToken;
-  //   database.collection("users").findOne({
-  //     "accessToken":accessToken
-  //   },function(error,user){
-  //     if(user==null){
-  //       result.json({
-  //         "status":"error",
-  //         "message":"user has been logged out"
-  //       });
-  //     }
-  //     else
-  //     {
-  //       users[user._id]=socketID;
-  //       result.json({
-  //         "status":"status",
-  //         "message":"socket has been connected"
-  //       });
-  //     }
-  //   });
-
-  //  })
 
   app.get("/createPage",function(request,result){
     result.render("createPage");
@@ -1431,5 +1404,23 @@ http.listen(3000, function () {
       }
     })
   })
+  app.get("/group/:_id",function(request,result){
+    var _id=request.params._id;
+    database.collection("groups").findOne({
+      "_id":ObjectId(_id)
+    },function(error,group){
+      if(group==null){
+        result.json({
+          "status":"error",
+          "message":"Group doesnot exist"
+        })
+      }else
+      {
+        result.render("singleGroup",{
+          "_id":_id
+        })
+      }
+    });
+  });
 });
 });
