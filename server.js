@@ -442,7 +442,61 @@ http.listen(3000, function () {
                    })
                  }
                })
-             }else{
+             }else if(type=="group_post"){
+               database.collection("groups").findOne({
+                 "_id":ObjectId(_id)
+               },function(error,group){
+                 if(group==null){
+                   result.json({
+                     "status":"error",
+                     "message":"Group does not exist"
+                   });
+                   return;  
+                 }else{
+                   var isMember=false;
+                   for(var a=0;a<group.members.length;a++){
+                     var member=group.members[a];
+                     if(member._id.toString()==user._id.toString()){
+                       isMember=true;
+                       break;
+                     }
+                   }
+                   if(!isMember){
+                     result.json({
+                       "status":"error",
+                       "message":"Sorry you are not a member of this group"
+                     });
+                     return;
+                   }
+                   database.collection("posts").insertOne({
+                     "caption":caption,
+                     "image":image,
+                     "video":video,
+                     "type":type,
+                     "createdAt":createdAt,
+                     "likers":[],
+                     "shares":[],
+                     "user":{
+                       "_id":group._id,
+                       "name":group.name,
+                       "profileImage":group.coverPhoto
+                     },
+                     "uploader":{
+                       "_id":user._id,
+                       "name":user.name,
+                       "profileImage":user.profileImage
+                     }
+                   },function(error,data){
+                     result.json({
+                       "status":"success",
+                       "message":"Post has been uploaded"
+                     })
+                   })
+                 }
+               })
+             }
+             
+             else{
               database.collection("posts").insertOne({
                 "caption":caption,
                 "image":image,
@@ -501,6 +555,15 @@ http.listen(3000, function () {
             for(var a=0;a<user.pages.length;a++){
               ids.push(user.pages[a]._id);
             }
+            for(var a=0;a<user.groups.length;a++){
+              if(user.groups[a].status=="Accepted"){
+                ids.push(user.groups[a]._id);
+              }
+            }
+            for(var a=0;a<user.friends.length;a++){
+              ids.push(user.friends[a]._id);
+            }
+
 
             database.collection("posts")
             .find({
@@ -790,12 +853,20 @@ http.listen(3000, function () {
           $options:"i"
         }
       }).toArray(function(error,pages){
-        result.json({
-          "status": "success",
-          "message": "Record has been fetched",
-          "data": data,
-          "pages":pages
-      });
+        database.collection("groups").find({
+          "name":{
+            $regex:".*"+query+".*",
+            $options:"i"
+          }
+        }).toArray(function(error,groups){
+          result.json({
+            "status": "success",
+            "message": "Record has been fetched",
+            "data": data,
+            "pages":pages,
+            "groups":groups
+        });
+        })
       });
     });
   });
@@ -1201,9 +1272,7 @@ http.listen(3000, function () {
       }
     })
   })
-  // app.get("/notifications",function(request,result){
-  //   result.render("notifications");
-  // });
+
   app.post("/getPageDetail",function(request,result){
     var _id=request.fields._id;
     database.collection("pages").findOne({
@@ -1462,6 +1531,149 @@ http.listen(3000, function () {
         })
       }
     });
+  });
+  app.post("/getGroupDetail",function (request,result) { 
+    var _id=request.fields._id;
+    database.collection("groups").findOne({
+      "_id":ObjectId(_id)
+    },function(error,group){
+      if(group==null){
+        result.json({
+          "status":"error",
+          "message":"Group doesnot exist."
+        })
+      }else
+      {
+        database.collection("posts").find({
+          $and:[{
+            "user._id":group._id
+          },{
+            "type":"group_post"
+          }]
+        }).toArray(function(error,posts){
+          result.json({
+            "status":"success",
+            "message":"Record has been fetched",
+            "data":group,
+            "posts":posts
+          })
+        })
+      }
+    })
+   })
+
+   app.post("/toggleJoinGroup",function(request,result){
+    var accessToken=request.fields.accessToken;
+    var _id=request.fields._id;
+    database.collection("users").findOne({
+      "accessToken":accessToken
+    },function(error,user){
+      if(user==null){
+        result.json({
+          "status":"error",
+          "message":"user has been logged out. Please login again"
+        });
+      }
+      else
+      {
+        database.collection("groups").findOne({
+          "_id":ObjectId(_id)
+        },function(error,group){
+          if(group==null){
+            result.json({
+            "status":"error",
+            "message":"Group doesnot exist"
+            })
+          }
+          else{
+            var isMember=false;
+            for(var a=0;a<group.members.length;a++){
+              var member=group.members[a];
+              if(member._id.toString()==user._id.toString()){
+                isMember=true;
+                break;
+              }
+            }
+            if(isMember){
+              database.collection("groups").updateOne({
+                "_id":ObjectId(_id)
+              },{
+                $pull:{
+                  "members":{
+                    "_id":user._id,
+                  }
+                }
+              },function(error,data){
+                database.collection("users").updateOne({
+                  "accessToken":accessToken
+                },{
+                  $pull:{
+                    "groups":{
+                      "_id":ObjectId(_id)
+                    }
+                  }
+                },function(error,data){
+                  result.json({
+                    "status":"leaved",
+                    "message":"Group has been left"
+                  })
+                })
+              })
+            }else{
+              database.collection("groups").updateOne({
+                "_id":ObjectId(_id)
+              },{
+                $push:{
+                  "members":{
+                    "_id":user._id,
+                    "name":user.name,
+                    "profileImage":user.profileImage,
+                    "status":"Pending"
+                  }
+                }
+              },function(error,data){
+                database.collection("users").updateOne({
+                  "accessToken":accessToken
+                },{
+                  $push:{
+                    "groups":{
+                      "_id":group._id,
+                      "name":group.name,
+                      "coverPhoto":group  .coverPhoto,
+                      "status":"pending"
+                    }
+                  }
+                },function(error,data){
+                  database.collection("users").updateOne({
+                    "_id":group.user._id
+                  },{
+                    $push:{
+                      "notifications":{
+                        "_id":ObjectId(),
+                        "type":"group_join_request",
+                        "content":user.name+" joined "+group.name,
+                        "profileImage":user.profileImage,
+                        "groupId":group._id,
+                        "userId":user._id,
+                        "status":"Pending",
+                        "createdAt":new Date().getTime()
+                      }
+                    }
+                  })
+                  result.json({
+                    "status":"success",
+                    "message":"joined group"
+                  })
+                })
+              })
+            }
+          }
+        })
+      }
+    })
+  })
+    app.get("/notifications",function(request,result){
+    result.render("notifications");
   });
 });
 });

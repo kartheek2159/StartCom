@@ -27,4 +27,28 @@
         </div>
     </div>
 </section>
+<script>
+    var isNotifications=true;
+    function showNotifications(){
+        var html="";
+        var notifications=window.user.notifications.reverse();
+        for(var a=0;a<notifications.length;a++){
+            var data=notifications[a];
+            html+='<li>';
+                html+='<figure><img src="'+mainURL+'/'+data.profileImage+'"style="width:45px;height:45px;object-fit:cover;"></figure>';
+                    html+='<divd class="notifi-meta">';
+                        html+='<p>'+data.content+'</p>';
+
+                        var createdAt=new Date(data.createdAt);
+                        var date=createdAt.getDate()+"";
+                        date=date.padStart(2,"0")+" "+months[createdAt.getMonth()]+","+createdAt.getFullYear();
+                        date+=" "+createdAt.getHours()+":"+createdAt.getMinutes();
+                        html+='<span>'+date+'</span>';
+                        html+='</div>';
+                        html+='</li>';
+        }
+        document.getElementById("all-notifications").innerHTML=html;
+    }
+
+</script>
 <%- include ("includes/footer") %>

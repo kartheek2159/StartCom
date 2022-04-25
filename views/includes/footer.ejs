@@ -59,6 +59,9 @@
 						if(typeof isGroupDetail!="undefined"&&isGroupDetail){
 							getGroupDetail();
 						}
+						if(typeof isNotifications!="undefined"&&isNotifications){
+							showNotifications();
+						}
 
 					} else {
 						localStorage.removeItem("accessToken");
