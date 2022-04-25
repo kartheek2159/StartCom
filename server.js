@@ -728,6 +728,47 @@ http.listen(3000, function () {
           }
         });
       });
+
+      app.post("/deletePost", function (request, result) {
+
+        var accessToken = request.fields.accessToken;
+        var _id = request.fields._id;
+        database.collection("users").findOne({
+          "accessToken": accessToken
+        }, function (error, user) {
+          if (user == null) {
+            result.json({
+              "status": "error",
+              "message": "User has been logged out. Please login again."
+            });
+          } else {
+
+            database.collection("posts").findOne({
+              "_id": ObjectId(_id)
+            }, function (error, post) {
+              if (post == null) {
+                result.json({
+                  "status": "error",
+                  "message": "Post does not exist."
+                });
+              } else {
+
+                database.collection("posts").deleteOne({
+                  "_id": ObjectId(_id)
+                },
+                function (error, data) {
+                  result.json({
+                    "status":"success",
+                    "message":"Post has been deleted"
+                  })
+                });
+              }
+            });
+          }
+        });
+      });
+
+
   app.get("/search/:query", function (request, result) {
     var query = request.params.query;
     result.render("search", {
