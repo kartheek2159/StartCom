@@ -974,7 +974,7 @@ http.listen(3000, function () {
                   "notifications":{
                     "_id":ObjectId(),
                     "type":"friend_request_accepted",
-                    "content":me.name+"accepted your friend request.",
+                    "content":me.name+" accepted your friend request.",
                     "profileImage":me.profileImage,
                     "createdAt":new Date().getTime()
                   }
