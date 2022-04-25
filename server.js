@@ -10,22 +10,15 @@ var ObjectId = mongodb.ObjectId;
 var http = require("http").createServer(app);
 var bcrypt = require("bcrypt");
 var fileSystem = require("fs");
-
 var jwt = require("jsonwebtoken");
 var accessTokenSecret = "myAccessTokenSecret123467890";
 
 app.use("/public", express.static(__dirname + "/public")); //making server to use public folder
 app.set("view engine", "ejs");
 
-// var socketIO = require("socket.io")(http);
-// var socketID = "";
 var users = [];
 var mainURL = "http://localhost:3000";
 
-// socketIO.on("connection", function (socket) {
-//   console.log("User Connection", socket.id);
-//   socketID = socket.id;
-// });
 
 http.listen(3000, function () {
   console.log("server started.");
@@ -60,13 +53,6 @@ http.listen(3000, function () {
                 });
             });
         });
-      // database
-      // .collection("groups")
-      // .find({})
-      // .toArray((err, presult) => {
-      //   res.render("admin", { result: result, presult: presult, pgresult: pgresult, gresult: gresult });
-
-      // });
     });
     app.post("/admin", async (req, res) => {
       if (req.fields.userrname) {
