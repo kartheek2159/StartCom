@@ -1,5 +1,3 @@
-Group no - 43
-
 Dasari Kartheek          - S20200010055
 B Samrat                 - S20200010031
 Mindaguditi V S S Viraat - S20200010127
@@ -29,7 +27,7 @@ Kalamalla Lokesh         - S20200010083
 >>inorder use dump file install mongodb database tools from the website and add path
   then enter the command mongorestore dump
 
->>
+>>https://github.com/kartheek2159/StartCom
 
 
 
