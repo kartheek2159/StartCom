@@ -18,7 +18,13 @@ Kalamalla Lokesh         - S20200010083
 
 >>Users can also chat with each other through chat interface.
 
+>>A user can post about their idea regarding startup or any kind of project
+
+>>They can delete and share posts within the timeline.
+
 >>Users can form pages, groups and also there can post something on their account.
+
+>>Each can see the posts of their friends in their timeline
 
 >>We can manipulate things which are created within the site using admin page.
 
