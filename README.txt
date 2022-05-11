@@ -29,7 +29,7 @@ Kalamalla Lokesh         - S20200010083
 >>inorder use dump file install mongodb database tools from the website and add path
   then enter the command mongorestore dump
 
->>https://github.com/kartheek2159/ffsdaftermid (github link)
+>>
 
 
 
