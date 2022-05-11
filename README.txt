@@ -1,8 +1,8 @@
 Group no - 43
 
-Mindaguditi V S S Viraat - S20200010127
 Dasari Kartheek          - S20200010055
 B Samrat                 - S20200010031
+Mindaguditi V S S Viraat - S20200010127
 Jayanth Bandameeda       - S20200010032 
 Kalamalla Lokesh         - S20200010083
 
